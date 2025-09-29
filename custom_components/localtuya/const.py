@@ -216,7 +216,7 @@ KNOWN_DEVICES = {
         # 21: Temperature (sensor in °F)
         # 22: Timer (select "1h" to "12h" only; values must be exactly "1h", "2h", etc.)
         "name": "OmniBreeze Tower Fan-5M-F",
-        "category": "fs",  # Assumed for fan; adjust if known
+        "category": "fs",
         "entities": [
             {
                 "platform": "fan",
