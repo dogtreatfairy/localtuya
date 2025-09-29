@@ -241,8 +241,8 @@ KNOWN_DEVICES = {
                 "platform": "switch",
                 "friendly_name": "OmniBreeze Mute",
                 "id": 13,
-                "state_on": True,
-                "state_off": False,
+                "state_on": False,
+                "state_off": True,
             },
             {
                 "platform": "switch",
