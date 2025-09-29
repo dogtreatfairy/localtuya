@@ -594,49 +594,21 @@ class LocalTuyaOptionsFlowHandler(config_entries.OptionsFlow):
                 cloud_api = self.hass.data.get(DOMAIN, {}).get(DATA_CLOUD)
                 product_id = None
                 if cloud_api:
-                    try:
-                        product_id = cloud_api.device_list.get(user_input[CONF_DEVICE_ID], {}).get("product_id")
-                        _LOGGER.debug("Fetched product_id from cloud: %s", product_id)
-                    except Exception as e:
-                        _LOGGER.warning("Cloud fetch failed: %s, falling back to local/discovery", e)
+                    product_id = cloud_api.device_list.get(user_input[CONF_DEVICE_ID], {}).get("product_id")
 
-                # Fallback: Try to fetch product_id from discovery or local connection if cloud fails
-                if not product_id:
-                    if dev_id in self.discovered_devices:
-                        product_id = self.discovered_devices[dev_id].get("productKey")  # Often 'productKey' in discovery
-                        _LOGGER.debug("Fallback product_id from discovery: %s", product_id)
-                    if not product_id:
-                        # Optional: Local fetch via pytuya (add if needed; requires connection)
-                        try:
-                            interface = await pytuya.connect(
-                                user_input[CONF_HOST],
-                                user_input[CONF_DEVICE_ID],
-                                user_input[CONF_LOCAL_KEY],
-                                float(user_input[CONF_PROTOCOL_VERSION]),
-                            )
-                            status = await interface.status()
-                            product_id = status.get("product_id")  # If available in status; test this
-                            await interface.close()
-                            _LOGGER.debug("Fallback product_id from local status: %s", product_id)
-                        except Exception as e:
-                            _LOGGER.warning("Local product_id fetch failed: %s", e)
-
+                existing_devices = self.config_entry.data.get(CONF_DEVICES, {}) if self.config_entry else {}
                 if product_id in KNOWN_DEVICES and not self.editing_device:
                     known_config = KNOWN_DEVICES[product_id]
-                    # Check for existing devices with same product_id
-                    existing_devices = self.config_entry.data.get(CONF_DEVICES, {}) if self.config_entry else {}
+
                     num_same_type = sum(1 for dev_config in existing_devices.values() if dev_config.get(CONF_MODEL) == known_config.get("name"))
                     if num_same_type > 0:
-                        # Append a number to default name for distinction (e.g., "Living Room OmniBreeze Tower Fan 2")
-                        base_name = user_input.get(CONF_FRIENDLY_NAME) or known_config.get("name")
-                        user_input[CONF_FRIENDLY_NAME] = f"{base_name} {num_same_type + 1}"
-                    
+
+                        user_input[CONF_FRIENDLY_NAME] = f"{user_input.get(CONF_FRIENDLY_NAME, known_config.get('name'))} {num_same_type + 1}"
+                
                     self.entities = known_config["entities"]
-                    
-                    # Set model/name if available
+
                     user_input[CONF_MODEL] = known_config.get("name", user_input.get(CONF_MODEL, ""))
                     
-                    # Proceed directly to create the device config without entity picking
                     config = {
                         **user_input,
                         CONF_DPS_STRINGS: self.dps_strings,
@@ -644,22 +616,16 @@ class LocalTuyaOptionsFlowHandler(config_entries.OptionsFlow):
                     }
                     dev_id = user_input[CONF_DEVICE_ID]
                     
-                    # Check if device already configured
                     if self.config_entry and dev_id in self.config_entry.data.get(CONF_DEVICES, {}):
                         return self.async_abort(reason="already_configured")
                     
-                    # Create or update entry
                     if self.config_entry:
                         new_data = self.config_entry.data.copy()
                         new_data[CONF_DEVICES][dev_id] = config
                         new_data[ATTR_UPDATED_AT] = str(int(time.time() * 1000))
                         self.hass.config_entries.async_update_entry(self.config_entry, data=new_data)
-                        return self.async_abort(
-                            reason="device_updated",
-                            description_placeholders={"dev_name": user_input[CONF_FRIENDLY_NAME]}
-                        )
+                        return self.async_abort(reason="device_updated")
                     else:
-                        # For first entry
                         return self.async_create_entry(
                             title=user_input[CONF_FRIENDLY_NAME],
                             data={

@@ -2,7 +2,7 @@
     "config": {
         "abort": {
             "already_configured": "Device has already been configured.",
-            "device_updated": "{dev_name} configuration has been updated!"
+            "device_updated": "Device configuration has been updated!"
         },
         "error": {
             "authentication_failed": "Failed to authenticate.\n{msg}",
