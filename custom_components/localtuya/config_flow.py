@@ -48,6 +48,7 @@ from .const import (
     DATA_DISCOVERY,
     DOMAIN,
     PLATFORMS,
+    KNOWN_DEVICES
 )
 from .discovery import discover
 
@@ -593,6 +594,48 @@ class LocalTuyaOptionsFlowHandler(config_entries.OptionsFlow):
                         return await self.async_step_configure_entity()
 
                 self.dps_strings = await validate_input(self.hass, user_input)
+                cloud_api = self.hass.data.get(DOMAIN, {}).get(DATA_CLOUD)
+                product_id = None
+                if cloud_api:
+                    product_id = cloud_api.device_list.get(user_input[CONF_DEVICE_ID], {}).get("product_id")
+
+                # Then, if product_id in KNOWN_DEVICES and not self.editing_device:  # Only for new devices
+                if product_id in KNOWN_DEVICES and not self.editing_device:
+                    known_config = KNOWN_DEVICES[product_id]
+                    self.entities = known_config["entities"]  # List of entity dicts
+                    
+                    # Set model/name if available
+                    user_input[CONF_MODEL] = known_config.get("name", user_input.get(CONF_MODEL, ""))
+                    
+                    # Proceed directly to create the device config without entity picking
+                    config = {
+                        **user_input,
+                        CONF_DPS_STRINGS: dps_strings,
+                        CONF_ENTITIES: self.entities,
+                    }
+                    dev_id = user_input[CONF_DEVICE_ID]
+                    
+                    # Check if device already configured
+                    if self.config_entry and dev_id in self.config_entry.data.get(CONF_DEVICES, {}):
+                        return self.async_abort(reason="already_configured")
+                    
+                    # Create or update entry
+                    if self.config_entry:
+                        new_data = self.config_entry.data.copy()
+                        new_data[CONF_DEVICES][dev_id] = config
+                        new_data[ATTR_UPDATED_AT] = str(int(time.time() * 1000))
+                        self.hass.config_entries.async_update_entry(self.config_entry, data=new_data)
+                        return self.async_abort(reason="device_updated")
+                    else:
+                        # For first entry
+                        return self.async_create_entry(
+                            title=user_input[CONF_FRIENDLY_NAME],
+                            data={
+                                CONF_DEVICES: {dev_id: config},
+                                ATTR_UPDATED_AT: str(int(time.time() * 1000)),
+                            },
+                        )
+
                 return await self.async_step_pick_entity_type()
             except CannotConnect:
                 errors["base"] = "cannot_connect"

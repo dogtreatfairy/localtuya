@@ -141,3 +141,82 @@ CONF_OPTIONS_FRIENDLY = "select_options_friendly"
 # States
 ATTR_STATE = "raw_state"
 CONF_RESTORE_ON_RECONNECT = "restore_on_reconnect"
+
+KNOWN_DEVICES = {
+    "lsbkqogj5ztove0f": {
+        "name": "Orzors Lite Plus Star Projector",
+        "category": "xktyd",
+        "entities": [
+            {
+                "platform": "switch",
+                "friendly_name": "Orzors Power",
+                "id": 20,
+                "state_on": True,
+                "state_off": False,
+            },
+            {
+                "platform": "switch",
+                "friendly_name": "Orzors Laser",
+                "id": 53,
+                "state_on": True,
+                "state_off": False,
+            },
+            {
+                "platform": "switch",
+                "friendly_name": "Orzors White Light",
+                "id": 63,
+                "state_on": True,
+                "state_off": False,
+            },
+            {
+                "platform": "fan",
+                "friendly_name": "Orzors Rotation",
+                "id": 60,
+                "fan_speed_control": 62,
+                "fan_speed_min": 1,
+                "fan_speed_max": 100,
+                "fan_dps_type": "int",
+                "fan_oscillating_control": None,
+                "fan_direction": None,
+                "fan_speed_ordered_list": "disabled",
+            },
+            {
+                "platform": "light",
+                "friendly_name": "Orzors Nebula",
+                "id": 20,  # Tied to main power, but can be separate if needed
+                "brightness": 22,
+                "brightness_lower": 10,
+                "brightness_upper": 1000,
+                "color_mode": 21,
+                "color_mode_set": "white;colour;scene",  # Assuming
+                "color_temp": None,  # If applicable
+                "color": 28,  # If control_data is for color, else None
+                "music_mode": False,
+                "color_temp_reverse": False,
+                "color_temp_min_kelvin": 2700,
+                "color_temp_max_kelvin": 6500,
+            },
+            {
+                "platform": "select",
+                "friendly_name": "Orzors Work Mode",
+                "id": 21,
+                "select_options": "white;colour;scene",
+                "select_options_friendly": "White;Colour;Scene",
+            },
+            {
+                "platform": "number",
+                "friendly_name": "Orzors Countdown Timer",
+                "id": 26,
+                "min_value": 0,
+                "max_value": 3600,
+                "step_size": 60,
+            },
+            # Optional: If control_data (28) is for custom strings/colors
+            # {
+            #     "platform": "input_text",
+            #     "friendly_name": "Orzors Control Data",
+            #     "id": 28,
+            # },
+        ],
+    },
+}
