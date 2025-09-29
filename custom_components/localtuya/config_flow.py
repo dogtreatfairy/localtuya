@@ -548,9 +548,6 @@ class LocalTuyaOptionsFlowHandler(config_entries.OptionsFlow):
             try:
                 self.device_data = user_input.copy()
                 if dev_id is not None:
-                    # self.device_data[CONF_PRODUCT_KEY] = self.devices[
-                    #     self.selected_device
-                    # ]["productKey"]
                     cloud_devs = self.hass.data[DOMAIN][DATA_CLOUD].device_list
                     if dev_id in cloud_devs:
                         self.device_data[CONF_MODEL] = cloud_devs[dev_id].get(
@@ -599,7 +596,6 @@ class LocalTuyaOptionsFlowHandler(config_entries.OptionsFlow):
                 if cloud_api:
                     product_id = cloud_api.device_list.get(user_input[CONF_DEVICE_ID], {}).get("product_id")
 
-                # Then, if product_id in KNOWN_DEVICES and not self.editing_device:  # Only for new devices
                 if product_id in KNOWN_DEVICES and not self.editing_device:
                     known_config = KNOWN_DEVICES[product_id]
                     self.entities = known_config["entities"]  # List of entity dicts
@@ -610,7 +606,7 @@ class LocalTuyaOptionsFlowHandler(config_entries.OptionsFlow):
                     # Proceed directly to create the device config without entity picking
                     config = {
                         **user_input,
-                        CONF_DPS_STRINGS: dps_strings,
+                        CONF_DPS_STRINGS: self.dps_strings,
                         CONF_ENTITIES: self.entities,
                     }
                     dev_id = user_input[CONF_DEVICE_ID]
@@ -692,7 +688,7 @@ class LocalTuyaOptionsFlowHandler(config_entries.OptionsFlow):
             errors=errors,
             description_placeholders=placeholders,
         )
-
+    
     async def async_step_pick_entity_type(self, user_input=None):
         """Handle asking if user wants to add another entity."""
         if user_input is not None:
