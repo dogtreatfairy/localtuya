@@ -144,79 +144,127 @@ CONF_RESTORE_ON_RECONNECT = "restore_on_reconnect"
 
 KNOWN_DEVICES = {
     "lsbkqogj5ztove0f": {
+        # Device dp_id assignments:
+        # 20: Master Switch (overall power toggle)
+        # 21: Not Used
+        # 22: Star Brightness (dimming control, min 10-max 1000; combined with 63 for Star light entity)
+        # 26: Timer (countdown in seconds, 0-86400 with 60s steps)
+        # 28: Not Used
+        # 53: Meteor (toggle for meteor effect)
+        # 60: Rotation (on/off for rotation; combined with 62 for Rotation light entity)
+        # 62: Rotation Speed (speed adjustment 1-100, treated as brightness in Rotation light)
+        # 63: Star (on/off for stars; combined with 22 for Star light entity)
         "name": "Orzors Lite Plus Star Projector",
         "category": "xktyd",
         "entities": [
             {
                 "platform": "switch",
-                "friendly_name": "Orzors Power",
+                "friendly_name": "Orzors Master Switch",
                 "id": 20,
                 "state_on": True,
                 "state_off": False,
             },
             {
                 "platform": "switch",
-                "friendly_name": "Orzors Laser",
+                "friendly_name": "Orzors Meteor",
                 "id": 53,
                 "state_on": True,
                 "state_off": False,
             },
             {
-                "platform": "switch",
-                "friendly_name": "Orzors White Light",
-                "id": 63,
-                "state_on": True,
-                "state_off": False,
-            },
-            {
-                "platform": "fan",
-                "friendly_name": "Orzors Rotation",
-                "id": 60,
-                "fan_speed_control": 62,
-                "fan_speed_min": 1,
-                "fan_speed_max": 100,
-                "fan_dps_type": "int",
-                "fan_oscillating_control": None,
-                "fan_direction": None,
-                "fan_speed_ordered_list": "disabled",
-            },
-            {
                 "platform": "light",
-                "friendly_name": "Orzors Nebula",
-                "id": 20,  # Tied to main power, but can be separate if needed
+                "friendly_name": "Orzors Star",
+                "id": 63,
                 "brightness": 22,
                 "brightness_lower": 10,
                 "brightness_upper": 1000,
-                "color_mode": 21,
-                "color_mode_set": "white;colour;scene",  # Assuming
-                "color_temp": None,  # If applicable
-                "color": 28,  # If control_data is for color, else None
                 "music_mode": False,
                 "color_temp_reverse": False,
                 "color_temp_min_kelvin": 2700,
                 "color_temp_max_kelvin": 6500,
             },
             {
-                "platform": "select",
-                "friendly_name": "Orzors Work Mode",
-                "id": 21,
-                "select_options": "white;colour;scene",
-                "select_options_friendly": "White;Colour;Scene",
+                "platform": "light",
+                "friendly_name": "Orzors Rotation",
+                "id": 60,
+                "brightness": 62,
+                "brightness_lower": 1,
+                "brightness_upper": 100,
+                "music_mode": False,
+                "color_temp_reverse": False,
+                "color_temp_min_kelvin": 2700,
+                "color_temp_max_kelvin": 6500,
             },
             {
                 "platform": "number",
-                "friendly_name": "Orzors Countdown Timer",
+                "friendly_name": "Orzors Timer",
                 "id": 26,
                 "min_value": 0,
-                "max_value": 3600,
+                "max_value": 86400,
                 "step_size": 60,
             },
-            # Optional: If control_data (28) is for custom strings/colors
-            # {
-            #     "platform": "input_text",
-            #     "friendly_name": "Orzors Control Data",
-            #     "id": 28,
-            # },
+        ],
+    },
+    "kuskdnpwgso1qinx": {
+        # Device dp_id assignments:
+        # 1: Power (fan on/off; combined with 3 and 5 for main fan entity)
+        # 2: Mode (select 0/Normal, 1/Natural, 2/Sleep, 3/Auto)
+        # 3: Speed (fan speed levels 1-5; combined with 1 for main fan entity)
+        # 5: Oscillation (toggle; combined with 1 for main fan entity)
+        # 13: Mute (toggle for silent mode)
+        # 15: Backlight (toggle for display)
+        # 21: Temperature (sensor in °F)
+        # 22: Timer (select "1h" to "12h" only; values must be exactly "1h", "2h", etc.)
+        "name": "OmniBreeze Tower Fan-5M-F",
+        "category": "fs",  # Assumed for fan; adjust if known
+        "entities": [
+            {
+                "platform": "fan",
+                "friendly_name": "OmniBreeze Tower Fan",
+                "id": 1,
+                "fan_speed_control": 3,
+                "fan_speed_min": 1,
+                "fan_speed_max": 5,
+                "fan_dps_type": "int",
+                "fan_oscillating_control": 5,
+                "fan_direction": None,
+                "fan_speed_ordered_list": "disabled",
+            },
+            {
+                "platform": "select",
+                "friendly_name": "OmniBreeze Mode",
+                "id": 2,
+                "select_options": "0;1;2;3",
+                "select_options_friendly": "Normal;Natural;Sleep;Auto",
+            },
+            {
+                "platform": "switch",
+                "friendly_name": "OmniBreeze Mute",
+                "id": 13,
+                "state_on": True,
+                "state_off": False,
+            },
+            {
+                "platform": "switch",
+                "friendly_name": "OmniBreeze Backlight",
+                "id": 15,
+                "state_on": True,
+                "state_off": False,
+            },
+            {
+                "platform": "sensor",
+                "friendly_name": "OmniBreeze Temperature",
+                "id": 21,
+                "device_class": "temperature",
+                "unit_of_measurement": "°F",
+            },
+            {
+                "platform": "select",
+                "friendly_name": "OmniBreeze Timer",
+                "id": 22,
+                "select_options": "1h;2h;3h;4h;5h;6h;7h;8h;9h;10h;11h;12h",
+                "select_options_friendly": "1h;2h;3h;4h;5h;6h;7h;8h;9h;10h;11h;12h",
+            },
         ],
     },
 }

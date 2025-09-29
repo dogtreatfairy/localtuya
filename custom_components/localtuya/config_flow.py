@@ -596,14 +596,19 @@ class LocalTuyaOptionsFlowHandler(config_entries.OptionsFlow):
                 if cloud_api:
                     product_id = cloud_api.device_list.get(user_input[CONF_DEVICE_ID], {}).get("product_id")
 
+                existing_devices = self.config_entry.data.get(CONF_DEVICES, {}) if self.config_entry else {}
                 if product_id in KNOWN_DEVICES and not self.editing_device:
                     known_config = KNOWN_DEVICES[product_id]
-                    self.entities = known_config["entities"]  # List of entity dicts
-                    
-                    # Set model/name if available
+
+                    num_same_type = sum(1 for dev_config in existing_devices.values() if dev_config.get(CONF_MODEL) == known_config.get("name"))
+                    if num_same_type > 0:
+
+                        user_input[CONF_FRIENDLY_NAME] = f"{user_input.get(CONF_FRIENDLY_NAME, known_config.get('name'))} {num_same_type + 1}"
+                
+                    self.entities = known_config["entities"]
+
                     user_input[CONF_MODEL] = known_config.get("name", user_input.get(CONF_MODEL, ""))
                     
-                    # Proceed directly to create the device config without entity picking
                     config = {
                         **user_input,
                         CONF_DPS_STRINGS: self.dps_strings,
@@ -611,11 +616,9 @@ class LocalTuyaOptionsFlowHandler(config_entries.OptionsFlow):
                     }
                     dev_id = user_input[CONF_DEVICE_ID]
                     
-                    # Check if device already configured
                     if self.config_entry and dev_id in self.config_entry.data.get(CONF_DEVICES, {}):
                         return self.async_abort(reason="already_configured")
                     
-                    # Create or update entry
                     if self.config_entry:
                         new_data = self.config_entry.data.copy()
                         new_data[CONF_DEVICES][dev_id] = config
@@ -623,7 +626,6 @@ class LocalTuyaOptionsFlowHandler(config_entries.OptionsFlow):
                         self.hass.config_entries.async_update_entry(self.config_entry, data=new_data)
                         return self.async_abort(reason="device_updated")
                     else:
-                        # For first entry
                         return self.async_create_entry(
                             title=user_input[CONF_FRIENDLY_NAME],
                             data={
