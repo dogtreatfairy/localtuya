@@ -1,5 +1,46 @@
 ![logo](https://github.com/rospogrigio/localtuya-homeassistant/blob/master/img/logo-small.png)
 
+# MODIFIED:
+Modified to include a "Known Devices" function which sets up known Tuya Devices with the correct device types for each dp_id.
+
+**Currently supported Known Devices**
+* OmniBreeze Tower Fan 5T (Costco)
+* Orzorz Lite Plus - Star / Galaxy Projector
+
+**New devices can be added by using the Tuya IOT Platform API to map the dp_id to a function.**
+
+1. Add your Tuya device to your Tuya App.
+2. Your Tuya App must be connected to your Tuya Developer Platform like for all other devices that use this integration.
+3. Using the API Explorer, navigate to Device Control --> Query Properties.
+4. Toggle any button in your Tuya app and look for a change in the "value" field of all items.
+   *for variable items such as brigness or speed, you need to set them to their maximum and minimum values and record the dp_id that changes and the maximum and minimum value at that dp_id. This can later be combined with other dp_id's to have an ON/OFF switch and a Variable item for an entity. 
+
+**For Example:**
+This is dp_id number 1 which controls the Power to the OmniBreeze Fan. The value is "true" when the fan is On and "false" when the fan is off. 
+```json
+{
+  "code": "switch",
+  "custom_name": "",
+  "dp_id": 1,
+  "time": 1759173134374,
+  "type": "bool",
+  "value": true
+}
+```
+
+5. After mapping all dp_id's to a funciton, you need to run the Device Management --> Query Device Details.
+6. From the API Output you need:
+* "product_id" --> used to mach a Known Device to a defined set of entities. 
+* "product_name"
+* "local_key" --> for use when setting up your device. 
+
+**NOTE: The product_id is how localtuya knows what device map to apply to the device being added. It will automatically name and allocate switches, lights, etc. Sometimes a device, such as rotation, will be assigned to an entity like a light. This is because a light can control brightness which can be used to control the speed of the rotation.**
+
+7. For mapped items, you also need to set them to their maximum and minimum values and record those for use when adding the device in the KNOWN_DEVICES section of const.py.
+
+
+# Original Readme
+
 A Home Assistant custom Integration for local handling of Tuya-based devices.
 
 This custom integration updates device status via pushing updates instead of polling, so status updates are fast (even when manually operated).
